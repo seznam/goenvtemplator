@@ -8,13 +8,13 @@ This tool is ideal for use without polluting you environment with dependencies. 
 ## Installation
 wget
 ```bash
-wget https://github.com/tnozicka/goenvtemplator/releases/download/v1.0.0/goenvtemplator-amd64 -O /usr/local/bin/goenvtemplator
+wget https://github.com/seznam/goenvtemplator/releases/download/v1.0.0/goenvtemplator-amd64 -O /usr/local/bin/goenvtemplator
 chmod +x /usr/local/bin/goenvtemplator
 ```
 
 Dockerfile
 ```Dockerfile
-ADD https://github.com/tnozicka/goenvtemplator/releases/download/v1.0.0/goenvtemplator-amd64 /usr/local/bin/goenvtemplator
+ADD https://github.com/seznam/goenvtemplator/releases/download/v1.0.0/goenvtemplator-amd64 /usr/local/bin/goenvtemplator
 RUN chmod +x /usr/local/bin/goenvtemplator
 ```
 
