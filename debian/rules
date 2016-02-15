@@ -1,0 +1,8 @@
+#!/usr/bin/make -f
+
+%:
+	+dh $@ --parallel
+
+override_dh_auto_install:
+	mkdir -p ./debian/goenvtemplator/usr/bin
+	install -m 0755 goenvtemplator ./debian/goenvtemplator/usr/bin
