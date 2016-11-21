@@ -1,32 +1,37 @@
 package main
 
 import (
+	"os"
 	"testing"
 )
 
 func TestGenerateTemplate(t *testing.T) {
-	source := `
-K={{ env "ALWAYS_THERE" }}
-K={{ env "NONEXISTING" }}
-K={{ .NONEXISTING }}
-K={{ default .NonExisting "default value" }}
-K={{ default (env "ALWAYS_THERE") }}
-K={{ default (env "NONEXISTING") "default value" }}
-	`
-	correctOutput := `
-K=always_there
-K=
-K=<no value>
-K=default value
-K=always_there
-K=default value
-	`
-	result, err := generateTemplate(source, "test")
-	if err != nil {
-		t.Fatal(err)
+	var tests = []struct {
+		in   string
+		want string
+		err  error
+	}{
+		{`K={{ env "GOENVTEMPLATOR_DEFINED_VAR" }}`, `K=foo`, nil},
+		{`K={{ env "NONEXISTING" }}`, `K=`, nil},
+		{`K={{ .NONEXISTING }}`, `K=<no value>`, nil},
+		{`K={{ default .NonExisting "default value" }}`, `K=default value`, nil},
+		{`K={{ default (env "GOENVTEMPLATOR_DEFINED_VAR") }}`, `K=foo`, nil},
+		{`K={{ default (env "NONEXISTING") "default value" }}`, `K=default value`, nil},
 	}
 
-	if result != correctOutput {
-		t.Fatalf("Result:\n%s\n==== is not equal to correct template output:\n%s\n", result, correctOutput)
+	templateName := "test"
+
+	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR", "foo")
+
+	for _, tt := range tests {
+		got, gotErr := generateTemplate(tt.in, templateName)
+
+		if tt.want != got {
+			t.Errorf("generateTemplate(%q, %q) => (%q, _), want (%q, _)", tt.in, templateName, got, tt.want)
+		}
+
+		if tt.err != gotErr {
+			t.Errorf("generateTemplate(%q, %q) => (_, %q), want (_, %q)", tt.in, templateName, gotErr, tt.err)
+		}
 	}
 }
