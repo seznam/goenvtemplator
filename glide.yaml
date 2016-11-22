@@ -1,0 +1,4 @@
+package: github.com/seznam/goenvtemplator
+import:
+- package: github.com/joho/godotenv
+  version: v1
