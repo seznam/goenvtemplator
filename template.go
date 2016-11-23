@@ -23,14 +23,7 @@ func (s OptionalString) String() string {
 	return *s.ptr
 }
 
-var alwaysThere string = "always_there"
-
 func Env(key string) OptionalString {
-	// We need to simulate always existing key for testing, but we do not want to pollute env
-	if key == "ALWAYS_THERE" {
-		return OptionalString{&alwaysThere}
-	}
-
 	value, ok := os.LookupEnv(key)
 	if !ok {
 		return OptionalString{nil}
