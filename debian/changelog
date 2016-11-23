@@ -2,8 +2,9 @@ goenvtemplator (1.1.0) UNRELEASED; urgency=medium
 
   * Table driven tests.
   * Removed hard coded env key from key.
+  * Added support of env files.
 
- -- Tomas Dohnalek <tomas.dohnalek@firma.seznam.cz>  Wed, 23 Nov 2016 15:23:48 +0100
+ -- Tomas Dohnalek <tomas.dohnalek@firma.seznam.cz>  Mon, 08 Feb 2016 16:33:27 +0100
 
 goenvtemplator (1.0.0) testing; urgency=medium
 

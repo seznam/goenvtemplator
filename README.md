@@ -25,6 +25,8 @@ goenvtemplator -help
 Usage of goenvtemplator:
   -debug-templates
     	Print processed templates to stdout.
+  -env-file value
+        Additional file with environment variables. Can be passed multiple times. (default [])
   -exec
     	Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.
   -template value
@@ -44,6 +46,38 @@ goenvtemplator -template /path/to/server.conf.tmpl:/path/to/server.conf  -templa
 ```Dockerfile
 ENTRYPOINT ["/usr/local/bin/goenvtemplator", "-template", "/path/to/server.conf.tmpl:/path/to/server.conf", "-exec"]
 CMD ["/usr/bin/server-binary", "server-argument1", "server-argument2", "..."]
+```
+
+### Env files
+It is possible to add additional environment variables in multiple env-files.
+Existing variables are **not** overwritten.
+Environment variables in files can be formated using shell syntax or yaml syntax.
+
+Let us consider an environment file `myenvfile` bellow.
+```bash
+# cat myenvfile
+A=a
+B=b
+B=bb
+#B=bbb
+export C=c
+# yaml syntax
+D: d
+```
+
+The behaviour of env-file argument and env variables evaluation is as follows:
+```
+goenvtemplator -env-file myenvfile -exec sh -c 'echo $A'
+> a
+export A=foo
+goenvtemplator -env-file myenvfile -exec sh -c 'echo $A'
+> foo
+goenvtemplator -env-file myenvfile -exec sh -c 'echo $B'
+> bb
+goenvtemplator -env-file myenvfile -exec sh -c 'echo $C'
+> c
+goenvtemplator -env-file myenvfile -exec sh -c 'echo $D'
+> d
 ```
 
 ## Using Templates

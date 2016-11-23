@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"os/exec"
@@ -39,6 +40,18 @@ func (ts *templatesPaths) String() string {
 	return fmt.Sprintf("%v", *ts)
 }
 
+// to parse slice of strings from flags we need to use custom type
+type envFiles []string
+
+func (ef *envFiles) Set(value string) error {
+	*ef = append(*ef, value)
+	return nil
+}
+
+func (ef *envFiles) String() string {
+	return fmt.Sprintf("%v", *ef)
+}
+
 func generateTemplates(ts templatesPaths, debug bool) error {
 	for _, t := range ts {
 		if v > 0 {
@@ -65,9 +78,19 @@ func main() {
 	flag.BoolVar(&doExec, "exec", false, "Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.")
 	var printVersion bool
 	flag.BoolVar(&printVersion, "version", false, "Prints version.")
+	var envFileList envFiles
+	flag.Var(&envFileList, "env-file", "Additional file with environment variables. Can be passed multiple times.")
 	flag.IntVar(&v, "v", 0, "Verbosity level.")
 
 	flag.Parse()
+
+	// if no env-file was passed, godotenv.Load loads .env file by default, we want to disable this
+	if len(envFileList) > 0 {
+		err := godotenv.Load(envFileList...)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	if printVersion {
 		log.Printf("Version: %s", buildVersion)
