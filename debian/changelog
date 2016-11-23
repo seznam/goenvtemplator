@@ -1,4 +1,4 @@
-goenvtemplator (1.1.0) UNRELEASED; urgency=medium
+goenvtemplator (1.1.0) Seznam; urgency=medium
 
   * Table driven tests.
   * Removed hard coded env key from key.
