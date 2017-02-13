@@ -1,6 +1,12 @@
-hash: 2e49700d65abd2ec5287560ff1c0eb932322e097aef96cae137da9cb4f5b0b0f
-updated: 2016-11-23T16:52:10.769828004+01:00
+hash: 425d244bf3bbb2e65ea63d5503c543fcc67e21d946b70801e9b38f9b78aaaa31
+updated: 2017-02-09T12:45:47.121193027+01:00
 imports:
+- name: github.com/aokoli/goutils
+  version: 9c37978a95bd5c709a15883b6242714ea6709e64
 - name: github.com/joho/godotenv
   version: a01a834e1654b4c9ca5b3ad05159445cc9c7ad08
+- name: github.com/Masterminds/sprig
+  version: 69011c0cd9b4d2e0733c4d9e2c8e2a5a0d0a2f2f
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
 testImports: []

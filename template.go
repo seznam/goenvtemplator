@@ -3,11 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
-	"text/template"
 	//	"io/ioutil"
 	"bytes"
+	"github.com/Masterminds/sprig"
+	"html/template"
 	"io/ioutil"
 	"log"
 )
@@ -21,38 +21,6 @@ func (s OptionalString) String() string {
 		return ""
 	}
 	return *s.ptr
-}
-
-func Env(key string) OptionalString {
-	value, ok := os.LookupEnv(key)
-	if !ok {
-		return OptionalString{nil}
-	}
-	return OptionalString{&value}
-}
-
-func Default(args ...interface{}) (string, error) {
-	for _, arg := range args {
-		if arg == nil {
-			continue
-		}
-		switch v := arg.(type) {
-		case string:
-			return v, nil
-		case *string:
-			if v != nil {
-				return *v, nil
-			}
-		case OptionalString:
-			if v.ptr != nil {
-				return *v.ptr, nil
-			}
-		default:
-			return "", fmt.Errorf("Default: unsupported type '%T'!", v)
-		}
-	}
-
-	return "", errors.New("Default: all arguments are nil!")
 }
 
 func Require(arg interface{}) (string, error) {
@@ -77,15 +45,14 @@ func Require(arg interface{}) (string, error) {
 }
 
 var funcMap = template.FuncMap{
-	"env":     Env,
-	"default": Default,
 	"require": Require,
 }
 
 func generateTemplate(source, name string) (string, error) {
 	var t *template.Template
 	var err error
-	if t, err = template.New(name).Funcs(funcMap).Parse(source); err != nil {
+	t, err = template.New(name).Funcs(funcMap).Funcs(sprig.FuncMap()).Parse(source)
+	if err != nil {
 		return "", err
 	}
 	var buffer bytes.Buffer

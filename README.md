@@ -81,10 +81,9 @@ goenvtemplator -env-file myenvfile -exec sh -c 'echo $D'
 ```
 
 ## Using Templates
-Templates use Golang [text/template](http://golang.org/pkg/text/template/).
+Templates use Golang [html/template](http://golang.org/pkg/html/template/)
+and [Sprig](https://github.com/Masterminds/sprig) library.
 
 ### Built-in functions
 There are a few built in functions as well:
-  * `env "ENV_NAME"` - Accesses environment variables. If it does not exist return empty string. `{{ env "TIMEOUT_MS }}`
   * `require (env "ENV_NAME")` - Renders an error if environments variable does not exists. If it is equal to empty string, returns empty string.  `{{ require (env "TIMEOUT_MS) }}`
-  * `default $default_1 $default_2 $default_3` - Returns a first argument that exists. If none is valid it generates error `{{ default (env "SPECIFIC_TIMEOUT_MS") (env "GENERAL_TIMEOUT_MS") "1000" }}`
