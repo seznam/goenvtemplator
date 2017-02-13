@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"os"
 	"testing"
 )
@@ -12,16 +13,25 @@ func TestGenerateTemplate(t *testing.T) {
 		err  error
 	}{
 		{`K={{ env "GOENVTEMPLATOR_DEFINED_VAR" }}`, `K=foo`, nil},
+		{`K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" }}`, `K=bar`, nil},
 		{`K={{ env "NONEXISTING" }}`, `K=`, nil},
-		{`K={{ .NONEXISTING }}`, `K=<no value>`, nil},
-		{`K={{ default .NonExisting "default value" }}`, `K=default value`, nil},
-		{`K={{ default (env "GOENVTEMPLATOR_DEFINED_VAR") }}`, `K=foo`, nil},
-		{`K={{ default (env "NONEXISTING") "default value" }}`, `K=default value`, nil},
+		{`K={{ .NONEXISTING }}`, `K=`, nil},
+		{`K={{ .NonExisting | default "default value" }}`, `K=default value`, nil},
+		{`K={{ env "GOENVTEMPLATOR_DEFINED_VAR" | default "xxx" }}`, `K=foo`, nil},
+		{`K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" | default "xxx" }}`, `K=bar`, nil},
+		{`K={{ env "NONEXISTING"| default "default value" }}`, `K=default value`, nil},
+		{`{{ "hi!" | upper | repeat 3 }}`, `HI!HI!HI!`, nil},
+		{`{{$v := "foo/bar/baz" | split "/"}}{{$v._1}}`, `bar`, nil},
 	}
 
 	templateName := "test"
 
 	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR", "foo")
+
+	err := godotenv.Load("./tests/fixtures.env")
+	if err != nil {
+		t.Errorf("Cannot load env file: %q", err)
+	}
 
 	for _, tt := range tests {
 		got, gotErr := generateTemplate(tt.in, templateName)

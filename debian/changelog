@@ -1,3 +1,20 @@
+goenvtemplator (2.0.0~rc1) Seznam; urgency=medium
+
+  * Added Sprig (useful template functions for Go templates)
+  * Breaking chages
+    - **`{{ .NonExistsent }}` resolves to empty string**
+    Before
+      `{{ .NonExistsent }}` => `<no-value>`
+    After
+      `{{ .NonExistsent }}` => ``
+    - **function `default` is used from `Sprig` and has another params**
+    Before:
+      `default (env "VAR") "10"`
+    After
+      `env "VAR" | default "10"`
+
+ -- Lukas Svoboda <lukas.svoboda2@firma.seznam.cz>  Fri, 10 Feb 2017 16:02:47 +0100
+
 goenvtemplator (1.1.0) Seznam; urgency=medium
 
   * Table driven tests.
