@@ -4,14 +4,18 @@ TAG :=-$(shell git describe --tags)
 ifeq "$(TAG)" "-"
 TAG :=
 endif
+DESTDIR      ?=
+BINARY       ?= goenvtemplator2
 
 LDFLAGS :=-X main.buildVersion=$(TAG)
 
-.PHONY:=all build test release clean
-
+.PHONY: all build test release clean install
 
 build:
-	go build -ldflags "$(LDFLAGS)"
+	go build -o $(BINARY) -ldflags "$(LDFLAGS)"
+
+install:
+	install -D -m 0755 $(BINARY) $(DESTDIR)/usr/bin/$(BINARY)
 
 test:
 	go test

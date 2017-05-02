@@ -1,3 +1,12 @@
+goenvtemplator (2.0.0~rc2) Seznam; urgency=medium
+
+  * Binary name contains major version (goenvtemplator2).
+  * No longer breaks goenvtemplator (v1).
+  * Added make install target.
+  * Added Depends and Built-Using keys to control file.
+
+ -- Tomas Dohnalek <tomas.dohnalek@firma.seznam.cz>  Tue, 02 May 2017 14:04:34 +0200
+
 goenvtemplator (2.0.0~rc1) Seznam; urgency=medium
 
   * Added Sprig (useful template functions for Go templates)
