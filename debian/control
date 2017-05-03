@@ -1,8 +1,9 @@
 Source: goenvtemplator
-Maintainer: https://github.com/seznam/goenvtemplator
+Maintainer: Sklik-Devops <sklik.devops@firma.seznam.cz>
 Section: admin
 Priority: optional
 Build-Depends: debhelper (>= 9), golang (>= 2:1.5), git
+Standards-Version: 3.9.8
 
 Package: goenvtemplator2
 Architecture: amd64
