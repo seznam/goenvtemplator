@@ -1,13 +1,13 @@
 Source: goenvtemplator
-Maintainer: https://github.com/seznam/goenvtemplator
+Maintainer: Sklik-Devops <sklik.devops@firma.seznam.cz>
 Section: admin
 Priority: optional
 Build-Depends: debhelper (>= 9), golang (>= 2:1.5), git
-Replaces: goenvtemplator
-Breaks: goenvtemplator
+Standards-Version: 3.9.8
 
 Package: goenvtemplator2
 Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Tool to template configuration files by environment variables.
  goenvtemplator is a simple app, that can template your config files by
  environment variables and optionally replace itself (by exec syscall)
