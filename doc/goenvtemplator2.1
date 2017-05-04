@@ -1,0 +1,28 @@
+.\" Manpage for goenvtemplator2.
+.\" Contact sklik-devops@firma.seznam.cz to correct errors or typos.
+.TH man 1 "03 May 2017" "1.0" "goenvtemplator2 man page"
+.SH NAME
+goenvtemplator2 \- Tool to template configuration files by environment variables and optionaly replace itself with target binary.
+.SH SYNOPSIS
+goenvtemplator2 [OPTIONS]
+
+.SH DESCRIPTION
+goenvtemplator2 is a simple app, that can template your config files by environment variables and optionally replace itself (by exec syscall) with the application binary. So at the end your application runs directly under the process that run this tool like docker as if it was originally the entrypoint itself.
+
+.SH OPTIONS
+Possible OPTIONS are:
+  -debug-templates    Print processed templates to stdout.
+  -env-file FILE      Additional file with environment variables. Can be
+                      passed multiple times. (default [])
+  -exec COMMAND ARGS  Activates exec by command. First non-flag arguments is
+                      the command, the rest are it's arguments.
+  -template VALUE     Template (/template:/dest). Can be passed multiple
+                      times. (default [])
+  -v INT              Verbosity level.
+  -version            Prints version.
+.SH SEE ALSO
+envsubst(1), env(1)
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Sklik-Devops (sklik.devops@firma.seznam.cz)
