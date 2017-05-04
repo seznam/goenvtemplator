@@ -1,4 +1,4 @@
-goenvtemplator (2.0.0~rc2) UNRELEASED; urgency=medium
+goenvtemplator (2.0.0~rc2) Seznam; urgency=medium
 
   * Binary name contains major version (goenvtemplator2).
   * No longer breaks goenvtemplator (v1).
