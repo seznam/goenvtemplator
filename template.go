@@ -1,15 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	"path/filepath"
-	//	"io/ioutil"
-	"bytes"
 	"github.com/Masterminds/sprig"
-	"html/template"
 	"io/ioutil"
 	"log"
+	"path/filepath"
+	"text/template"
 )
 
 type OptionalString struct {
@@ -51,7 +50,7 @@ var funcMap = template.FuncMap{
 func generateTemplate(source, name string) (string, error) {
 	var t *template.Template
 	var err error
-	t, err = template.New(name).Funcs(funcMap).Funcs(sprig.FuncMap()).Parse(source)
+	t, err = template.New(name).Option("missingkey=zero").Funcs(funcMap).Funcs(sprig.TxtFuncMap()).Parse(source)
 	if err != nil {
 		return "", err
 	}
