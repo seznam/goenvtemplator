@@ -22,6 +22,7 @@ func TestGenerateTemplate(t *testing.T) {
 		{`K={{ env "NONEXISTING"| default "default value" }}`, `K=default value`, nil},
 		{`{{ "hi!" | upper | repeat 3 }}`, `HI!HI!HI!`, nil},
 		{`{{$v := "foo/bar/baz" | split "/"}}{{$v._1}}`, `bar`, nil},
+		{`<?xml version="1.0"?>`, `<?xml version="1.0"?>`, nil},
 	}
 
 	templateName := "test"
