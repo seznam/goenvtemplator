@@ -50,12 +50,14 @@ var funcMap = template.FuncMap{
 func generateTemplate(source, name string) (string, error) {
 	var t *template.Template
 	var err error
-	t, err = template.New(name).Option("missingkey=zero").Funcs(funcMap).Funcs(sprig.TxtFuncMap()).Parse(source)
+	t, err = template.New(name).Option("missingkey=error").Funcs(funcMap).Funcs(sprig.TxtFuncMap()).Parse(source)
 	if err != nil {
 		return "", err
 	}
 	var buffer bytes.Buffer
-	if err = t.Execute(&buffer, nil); err != nil {
+	// hacking because go 1.7 fails to throw error, see https://github.com/golang/go/commit/277bcbbdcd26f2d64493e596238e34b47782f98e
+	emptyHash := map[string]interface{}{}
+	if err = t.Execute(&buffer, &emptyHash); err != nil {
 		return "", err
 	}
 	return buffer.String(), nil
