@@ -8,19 +8,19 @@ This tool is ideal for use without polluting you environment with dependencies. 
 ## Installation
 wget
 ```bash
-wget https://github.com/seznam/goenvtemplator/releases/download/v1.0.0/goenvtemplator-amd64 -O /usr/local/bin/goenvtemplator
+wget https://github.com/seznam/goenvtemplator/releases/download/v2.0.0-rc3/goenvtemplator-amd64 -O /usr/local/bin/goenvtemplator2
 chmod +x /usr/local/bin/goenvtemplator
 ```
 
 Dockerfile
 ```Dockerfile
-ADD https://github.com/seznam/goenvtemplator/releases/download/v1.0.0/goenvtemplator-amd64 /usr/local/bin/goenvtemplator
+ADD https://github.com/seznam/goenvtemplator/releases/download/v2.0.0-rc3/goenvtemplator-amd64 /usr/local/bin/goenvtemplator2
 RUN chmod +x /usr/local/bin/goenvtemplator
 ```
 
 
 ## Usage
-goenvtemplator -help
+goenvtemplator2 -help
 ```
 Usage of goenvtemplator:
   -debug-templates
@@ -39,12 +39,12 @@ Usage of goenvtemplator:
 
 ### Example
 ```bash
-goenvtemplator -template /path/to/server.conf.tmpl:/path/to/server.conf  -template /path/to/server2.conf.tmpl:/path/to/server2.conf
+goenvtemplator2 -template /path/to/server.conf.tmpl:/path/to/server.conf  -template /path/to/server2.conf.tmpl:/path/to/server2.conf
 ```
 
 ### Dockerfile
 ```Dockerfile
-ENTRYPOINT ["/usr/local/bin/goenvtemplator", "-template", "/path/to/server.conf.tmpl:/path/to/server.conf", "-exec"]
+ENTRYPOINT ["/usr/local/bin/goenvtemplator2", "-template", "/path/to/server.conf.tmpl:/path/to/server.conf", "-exec"]
 CMD ["/usr/bin/server-binary", "server-argument1", "server-argument2", "..."]
 ```
 
