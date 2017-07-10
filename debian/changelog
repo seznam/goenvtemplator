@@ -1,3 +1,10 @@
+goenvtemplator (2.0.0~rc3) Seznam; urgency=medium
+
+  * Binary name changed to goenvtemplator2 to support dual installation of both major versions.
+  * Fixed #8 via #9, this change required to change behaviour of .NONEXISTING elements which now raise an error.
+
+ -- Tomas Dohnalek <tomas.dohnalek@firma.seznam.cz>  Mon, 10 Jul 2017 11:01:19 +0200
+
 goenvtemplator (2.0.0~rc2) Seznam; urgency=medium
 
   * Binary name contains major version (goenvtemplator2).
