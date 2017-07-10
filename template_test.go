@@ -3,10 +3,13 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"os"
+	"reflect"
 	"testing"
+	"text/template"
 )
 
 func TestGenerateTemplate(t *testing.T) {
+	templateName := "test"
 	var tests = []struct {
 		in   string
 		want string
@@ -15,16 +18,15 @@ func TestGenerateTemplate(t *testing.T) {
 		{`K={{ env "GOENVTEMPLATOR_DEFINED_VAR" }}`, `K=foo`, nil},
 		{`K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" }}`, `K=bar`, nil},
 		{`K={{ env "NONEXISTING" }}`, `K=`, nil},
-		{`K={{ .NONEXISTING }}`, `K=`, nil},
-		{`K={{ .NonExisting | default "default value" }}`, `K=default value`, nil},
+		{`K={{ .NONEXISTING }}`, ``, template.ExecError{}},
+		{`K={{ .NonExisting | default "default value" }}`, ``, template.ExecError{}},
 		{`K={{ env "GOENVTEMPLATOR_DEFINED_VAR" | default "xxx" }}`, `K=foo`, nil},
 		{`K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" | default "xxx" }}`, `K=bar`, nil},
 		{`K={{ env "NONEXISTING"| default "default value" }}`, `K=default value`, nil},
 		{`{{ "hi!" | upper | repeat 3 }}`, `HI!HI!HI!`, nil},
 		{`{{$v := "foo/bar/baz" | split "/"}}{{$v._1}}`, `bar`, nil},
+		{`<?xml version="1.0"?>`, `<?xml version="1.0"?>`, nil},
 	}
-
-	templateName := "test"
 
 	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR", "foo")
 
@@ -33,15 +35,17 @@ func TestGenerateTemplate(t *testing.T) {
 		t.Errorf("Cannot load env file: %q", err)
 	}
 
-	for _, tt := range tests {
-		got, gotErr := generateTemplate(tt.in, templateName)
+	for _, testcase := range tests {
+		got, gotErr := generateTemplate(testcase.in, templateName)
 
-		if tt.want != got {
-			t.Errorf("generateTemplate(%q, %q) => (%q, _), want (%q, _)", tt.in, templateName, got, tt.want)
+		if testcase.want != got {
+			t.Errorf("generateTemplate(%q, %q) => (%q, _), want (%q, _)", testcase.in, templateName, got, testcase.want)
 		}
 
-		if tt.err != gotErr {
-			t.Errorf("generateTemplate(%q, %q) => (_, %q), want (_, %q)", tt.in, templateName, gotErr, tt.err)
+		errType, gotErrType := reflect.TypeOf(testcase.err), reflect.TypeOf(gotErr)
+
+		if errType != gotErrType {
+			t.Errorf("generateTemplate(%q, %q) => (_, %q), want (_, %q)", testcase.in, templateName, gotErrType, errType)
 		}
 	}
 }
