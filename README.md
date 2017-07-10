@@ -81,7 +81,7 @@ goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $D'
 ```
 
 ## Using Templates
-Templates use Golang [html/template](http://golang.org/pkg/html/template/)
+Templates use Golang [text/template](http://golang.org/pkg/text/template/)
 and [Sprig](https://github.com/Masterminds/sprig) library.
 
 ### Built-in functions
