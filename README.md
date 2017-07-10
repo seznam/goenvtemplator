@@ -9,13 +9,13 @@ This tool is ideal for use without polluting you environment with dependencies. 
 wget
 ```bash
 wget https://github.com/seznam/goenvtemplator/releases/download/v2.0.0-rc3/goenvtemplator-amd64 -O /usr/local/bin/goenvtemplator2
-chmod +x /usr/local/bin/goenvtemplator
+chmod +x /usr/local/bin/goenvtemplator2
 ```
 
 Dockerfile
 ```Dockerfile
 ADD https://github.com/seznam/goenvtemplator/releases/download/v2.0.0-rc3/goenvtemplator-amd64 /usr/local/bin/goenvtemplator2
-RUN chmod +x /usr/local/bin/goenvtemplator
+RUN chmod +x /usr/local/bin/goenvtemplator2
 ```
 
 
@@ -67,16 +67,16 @@ D: d
 
 The behaviour of env-file argument and env variables evaluation is as follows:
 ```
-goenvtemplator -env-file myenvfile -exec sh -c 'echo $A'
+goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $A'
 > a
 export A=foo
-goenvtemplator -env-file myenvfile -exec sh -c 'echo $A'
+goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $A'
 > foo
-goenvtemplator -env-file myenvfile -exec sh -c 'echo $B'
+goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $B'
 > bb
-goenvtemplator -env-file myenvfile -exec sh -c 'echo $C'
+goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $C'
 > c
-goenvtemplator -env-file myenvfile -exec sh -c 'echo $D'
+goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $D'
 > d
 ```
 
