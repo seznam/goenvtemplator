@@ -18,6 +18,14 @@ ADD https://github.com/seznam/goenvtemplator/releases/download/v2.0.0-rc3/goenvt
 RUN chmod +x /usr/local/bin/goenvtemplator2
 ```
 
+## Building from source
+```bash
+# if you have glide already get the binary
+go get github.com/Masterminds/glide
+# install dependencies
+$GOPATH/bin/glide i
+make
+```
 
 ## Usage
 goenvtemplator2 -help
