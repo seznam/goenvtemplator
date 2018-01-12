@@ -33,9 +33,17 @@ func TestGenerateTemplate(t *testing.T) {
 		{in: `<?xml version="1.0"?>`, want: `<?xml version="1.0"?>`},
 		{in: `K={{env "GOENVTEMPLATOR_DEFINED_VAR"}}`, want: `K={{env "GOENVTEMPLATOR_DEFINED_VAR"}}`, err: nil, leftDelim: "[[", rightDelim: "]]"},
 		{in: `K=[[env "GOENVTEMPLATOR_DEFINED_VAR"]]`, want: `K=foo`, err: nil, leftDelim: "[[", rightDelim: "]]"},
+		{in: `K={{ require (env "FOO" )}}`, err: template.ExecError{}},
+		{in: `K={{ require (env "GOENVTEMPLATOR_DEFINED_VAR" )}}`, want: `K=foo`},
+		{in: `K={{ require (env "GOENVTEMPLATOR_DEFINED_VAR_EMPTY" )}}`, err: template.ExecError{}},
+		{in: `K={{ required "message" (env "GOENVTEMPLATOR_DEFINED_VAR_EMPTY") }}`, err: template.ExecError{}},
+		{in: `K={{ required "message" (env "GOENVTEMPLATOR_DEFINED_VAR_EMPTY" | default "foo") }}`, want: `K=foo`},
+		{in: `K={{ required "message" "foo" }}`, want: `K=foo`},
+		{in: `K={{ required "message" "" }}`, err: template.ExecError{}},
 	}
 
 	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR", "foo")
+	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR_EMPTY", "")
 
 	err := godotenv.Load("./tests/fixtures.env")
 	if err != nil {

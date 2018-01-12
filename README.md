@@ -3,7 +3,7 @@ Tool to template configuration files by environment variables and optionally rep
 
 goenvtemplator is a simple app, that can template your config files by environment variables and optionally replace itself (by exec syscall) with the application binary. So at the end your application runs directly under the process that run this tool like docker as if it was originally the entrypoint itself.
 
-This tool is ideal for use without polluting you environment with dependencies. It is fully statically linked so it has no dependencies whatsoever. If you use Dockerfile you don't even need wget or curl since it can be installed only by dockerfile's ADD instruction. 
+This tool is ideal for use without polluting you environment with dependencies. It is fully statically linked so it has no dependencies whatsoever. If you use Dockerfile you don't even need wget or curl since it can be installed only by dockerfile's ADD instruction.
 
 ## Installation
 wget
@@ -98,11 +98,11 @@ and [Sprig](https://github.com/Masterminds/sprig) library.
 
 ### Built-in functions
 There are a few built in functions as well:
-  * `{{ require (env "ENV_NAME") }}` - Renders an error if environments variable does not exists. If it is equal to empty string, returns empty string.  `{{ require (env "TIMEOUT_MS) }}`
+  * `{{ required  "Error message" Value }}` - Raises an error if `Value` is nil or it is equal to empty string. For example `{{ required "TIMEOUT_MS must be set!" (env "TIMEOUT_MS) }}`
   * `{{ range $key, $value := envall }}{{ $key }}={{ $value }};{{ end }}` - Loop over every environment variable.
 
 ### Nested Go templates
-If you have nested Go templates there is problem with escaping. To resolve this problem you can define different 
+If you have nested Go templates there is problem with escaping. To resolve this problem you can define different
 delimiters of template tags using `-delim-left` and `-delim-right` command line arguments.
 
 Example of templating with `[[ ]]` instead of `{{ }}` delimiters
