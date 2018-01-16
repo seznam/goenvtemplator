@@ -30,19 +30,23 @@ make
 ## Usage
 goenvtemplator2 -help
 ```
-Usage of goenvtemplator:
+Usage of goenvtemplator2:
   -debug-templates
-    	Print processed templates to stdout.
+        Print processed templates to stdout.
+  -delim-left string
+        Override default left delimiter {{.
+  -delim-right string
+        Override default right delimiter }}.
   -env-file value
-        Additional file with environment variables. Can be passed multiple times. (default [])
+        Additional file with environment variables. Can be passed multiple times.
   -exec
-    	Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.
+        Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.
   -template value
-    	Template (/template:/dest). Can be passed multiple times. (default [])
+        Template (/template:/dest). Can be passed multiple times.
   -v int
-    	Verbosity level.
+        Verbosity level.
   -version
-    	Prints version.
+        Prints version.
 ```
 
 ### Example
@@ -95,3 +99,12 @@ and [Sprig](https://github.com/Masterminds/sprig) library.
 ### Built-in functions
 There are a few built in functions as well:
   * `require (env "ENV_NAME")` - Renders an error if environments variable does not exists. If it is equal to empty string, returns empty string.  `{{ require (env "TIMEOUT_MS) }}`
+
+### Nested Go templates
+If you have nested Go templates there is problem with escaping. To resolve this problem you can define different 
+delimiters of template tags using `-delim-left` and `-delim-right` command line arguments.
+
+Example of templating with `[[ ]]` instead of `{{ }}` delimiters
+```bash
+goenvtemplator2 -template /foo/bar.tmpl:/bar/foo.conf -delim-left [[ -delim-right ]]
+```

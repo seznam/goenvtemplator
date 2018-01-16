@@ -11,21 +11,25 @@ import (
 func TestGenerateTemplate(t *testing.T) {
 	templateName := "test"
 	var tests = []struct {
-		in   string
-		want string
-		err  error
+		in         string
+		want       string
+		err        error
+		leftDelim  string
+		rightDelim string
 	}{
-		{`K={{ env "GOENVTEMPLATOR_DEFINED_VAR" }}`, `K=foo`, nil},
-		{`K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" }}`, `K=bar`, nil},
-		{`K={{ env "NONEXISTING" }}`, `K=`, nil},
-		{`K={{ .NONEXISTING }}`, ``, template.ExecError{}},
-		{`K={{ .NonExisting | default "default value" }}`, ``, template.ExecError{}},
-		{`K={{ env "GOENVTEMPLATOR_DEFINED_VAR" | default "xxx" }}`, `K=foo`, nil},
-		{`K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" | default "xxx" }}`, `K=bar`, nil},
-		{`K={{ env "NONEXISTING"| default "default value" }}`, `K=default value`, nil},
-		{`{{ "hi!" | upper | repeat 3 }}`, `HI!HI!HI!`, nil},
-		{`{{$v := "foo/bar/baz" | split "/"}}{{$v._1}}`, `bar`, nil},
-		{`<?xml version="1.0"?>`, `<?xml version="1.0"?>`, nil},
+		{in: `K={{ env "GOENVTEMPLATOR_DEFINED_VAR" }}`, want: `K=foo`},
+		{in: `K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" }}`, want: `K=bar`},
+		{in: `K={{ env "NONEXISTING" }}`, want: `K=`},
+		{in: `K={{ .NONEXISTING }}`, want: ``, err: template.ExecError{}},
+		{in: `K={{ .NonExisting | default "default value" }}`, want: ``, err: template.ExecError{}},
+		{in: `K={{ env "GOENVTEMPLATOR_DEFINED_VAR" | default "xxx" }}`, want: `K=foo`},
+		{in: `K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" | default "xxx" }}`, want: `K=bar`},
+		{in: `K={{ env "NONEXISTING"| default "default value" }}`, want: `K=default value`},
+		{in: `{{ "hi!" | upper | repeat 3 }}`, want: `HI!HI!HI!`},
+		{in: `{{$v := "foo/bar/baz" | split "/"}}{{$v._1}}`, want: `bar`},
+		{in: `<?xml version="1.0"?>`, want: `<?xml version="1.0"?>`},
+		{in: `K={{env "GOENVTEMPLATOR_DEFINED_VAR"}}`, want: `K={{env "GOENVTEMPLATOR_DEFINED_VAR"}}`, err: nil, leftDelim: "[[", rightDelim: "]]"},
+		{in: `K=[[env "GOENVTEMPLATOR_DEFINED_VAR"]]`, want: `K=foo`, err: nil, leftDelim: "[[", rightDelim: "]]"},
 	}
 
 	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR", "foo")
@@ -36,16 +40,16 @@ func TestGenerateTemplate(t *testing.T) {
 	}
 
 	for _, testcase := range tests {
-		got, gotErr := generateTemplate(testcase.in, templateName)
+		got, gotErr := generateTemplate(testcase.in, templateName, testcase.leftDelim, testcase.rightDelim)
 
 		if testcase.want != got {
-			t.Errorf("generateTemplate(%q, %q) => (%q, _), want (%q, _)", testcase.in, templateName, got, testcase.want)
+			t.Errorf("generateTemplate(%q, %q, %q, %q) => (%q, _), want (%q, _)", testcase.in, templateName, testcase.leftDelim, testcase.rightDelim, got, testcase.want)
 		}
 
 		errType, gotErrType := reflect.TypeOf(testcase.err), reflect.TypeOf(gotErr)
 
 		if errType != gotErrType {
-			t.Errorf("generateTemplate(%q, %q) => (_, %q), want (_, %q)", testcase.in, templateName, gotErrType, errType)
+			t.Errorf("generateTemplate(%q, %q, %q, %q)) => (_, %q), want (_, %q)", testcase.in, templateName, testcase.leftDelim, testcase.rightDelim, gotErrType, errType)
 		}
 	}
 }

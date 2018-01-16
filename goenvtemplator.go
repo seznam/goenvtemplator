@@ -52,12 +52,12 @@ func (ef *envFiles) String() string {
 	return fmt.Sprintf("%v", *ef)
 }
 
-func generateTemplates(ts templatesPaths, debug bool) error {
+func generateTemplates(ts templatesPaths, debug bool, delimLeft string, delimRight string) error {
 	for _, t := range ts {
 		if v > 0 {
 			log.Printf("generating %s -> %s", t.source, t.destination)
 		}
-		if err := generateFile(t.source, t.destination, debug); err != nil {
+		if err := generateFile(t.source, t.destination, debug, delimLeft, delimRight); err != nil {
 			return fmt.Errorf("Error while generating '%s' -> '%s'. %v", t.source, t.destination, err)
 		}
 	}
@@ -80,6 +80,10 @@ func main() {
 	flag.BoolVar(&printVersion, "version", false, "Prints version.")
 	var envFileList envFiles
 	flag.Var(&envFileList, "env-file", "Additional file with environment variables. Can be passed multiple times.")
+	var delimLeft string
+	flag.StringVar(&delimLeft, "delim-left", "", "Override default left delimiter {{.")
+	var delimRight string
+	flag.StringVar(&delimRight, "delim-right", "", "Override default right delimiter }}.")
 	flag.IntVar(&v, "v", 0, "Verbosity level.")
 
 	flag.Parse()
@@ -101,7 +105,7 @@ func main() {
 		log.Print("Generating templates")
 	}
 
-	if err := generateTemplates(tmpls, debugTemplates); err != nil {
+	if err := generateTemplates(tmpls, debugTemplates, delimLeft, delimRight); err != nil {
 		log.Fatal(err)
 	}
 

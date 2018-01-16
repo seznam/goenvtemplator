@@ -47,10 +47,10 @@ var funcMap = template.FuncMap{
 	"require": Require,
 }
 
-func generateTemplate(source, name string) (string, error) {
+func generateTemplate(source, name string, delimLeft string, delimRight string) (string, error) {
 	var t *template.Template
 	var err error
-	t, err = template.New(name).Option("missingkey=error").Funcs(funcMap).Funcs(sprig.TxtFuncMap()).Parse(source)
+	t, err = template.New(name).Delims(delimLeft, delimRight).Option("missingkey=error").Funcs(funcMap).Funcs(sprig.TxtFuncMap()).Parse(source)
 	if err != nil {
 		return "", err
 	}
@@ -63,7 +63,7 @@ func generateTemplate(source, name string) (string, error) {
 	return buffer.String(), nil
 }
 
-func generateFile(templatePath, destinationPath string, debugTemplates bool) error {
+func generateFile(templatePath, destinationPath string, debugTemplates bool, delimLeft string, delimRight string) error {
 	if !filepath.IsAbs(templatePath) {
 		return fmt.Errorf("Template path '%s' is not absolute!", templatePath)
 	}
@@ -78,7 +78,7 @@ func generateFile(templatePath, destinationPath string, debugTemplates bool) err
 		return err
 	}
 	s := string(slice)
-	result, err := generateTemplate(s, filepath.Base(templatePath))
+	result, err := generateTemplate(s, filepath.Base(templatePath), delimLeft, delimRight)
 	if err != nil {
 		return err
 	}
