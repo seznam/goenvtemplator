@@ -7,7 +7,9 @@ import (
 	"github.com/Masterminds/sprig"
 	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -43,8 +45,20 @@ func Require(arg interface{}) (string, error) {
 	return "", fmt.Errorf("Requires: unsupported type '%T'!", v)
 }
 
+func EnvAll() (map[string]string, error) {
+	res := make(map[string]string)
+
+	for _, item := range os.Environ() {
+		split := strings.Split(item, "=")
+		res[split[0]] = strings.Join(split[1:], "=")
+	}
+
+	return res, nil
+}
+
 var funcMap = template.FuncMap{
 	"require": Require,
+	"envall":  EnvAll,
 }
 
 func generateTemplate(source, name string, delimLeft string, delimRight string) (string, error) {
