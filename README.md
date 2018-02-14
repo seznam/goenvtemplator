@@ -98,7 +98,8 @@ and [Sprig](https://github.com/Masterminds/sprig) library.
 
 ### Built-in functions
 There are a few built in functions as well:
-  * `require (env "ENV_NAME")` - Renders an error if environments variable does not exists. If it is equal to empty string, returns empty string.  `{{ require (env "TIMEOUT_MS) }}`
+  * `{{ require (env "ENV_NAME") }}` - Renders an error if environments variable does not exists. If it is equal to empty string, returns empty string.  `{{ require (env "TIMEOUT_MS) }}`
+  * `{{ range $key, $value := envall }}{{ $key }}={{ $value }};{{ end }}` - Loop over every environment variable.
 
 ### Nested Go templates
 If you have nested Go templates there is problem with escaping. To resolve this problem you can define different 
