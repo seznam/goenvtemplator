@@ -5,12 +5,18 @@ import (
 	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 )
+
+type Templar interface {
+	generateTemplate() (string, error)
+}
 
 type templatePaths struct {
 	source      string
@@ -18,7 +24,8 @@ type templatePaths struct {
 }
 
 func (t templatePaths) String() string {
-	return fmt.Sprintf("{source: '%s', destination: '%s'}", t.source, t.destination)
+	return fmt.Sprintf("{source: '%s', destination: '%s'}",
+		t.source, t.destination)
 }
 
 type templatesPaths []templatePaths
@@ -52,14 +59,70 @@ func (ef *envFiles) String() string {
 	return fmt.Sprintf("%v", *ef)
 }
 
-func generateTemplates(ts templatesPaths, debug bool, delimLeft string, delimRight string) error {
+func writeFile(destinationPath string, data string) error {
+	if !filepath.IsAbs(destinationPath) {
+		log.Fatalf("Destination path '%s' is not absolute!", destinationPath)
+		return errors.New("absolute path error")
+	}
+
+	if err := ioutil.WriteFile(destinationPath, []byte(data), 0664); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func readSource(templatePath string) (string, error) {
+	if !filepath.IsAbs(templatePath) {
+		log.Fatalf("Template path '%s' is not absolute!", templatePath)
+		return "", errors.New("absolute path error")
+	}
+
+	var slice []byte
+	var err error
+	if slice, err = ioutil.ReadFile(templatePath); err != nil {
+		return "", err
+	}
+
+	return string(slice), nil
+
+}
+
+func generateTemplates(
+	ts templatesPaths, debug bool, delimLeft string, delimRight string, engine string) error {
 	for _, t := range ts {
 		if v > 0 {
 			log.Printf("generating %s -> %s", t.source, t.destination)
 		}
-		if err := generateFile(t.source, t.destination, debug, delimLeft, delimRight); err != nil {
-			return fmt.Errorf("Error while generating '%s' -> '%s'. %v", t.source, t.destination, err)
+
+		var templar Templar
+
+		source, err := readSource(t.source)
+		if err != nil {
+			return err
 		}
+
+		templateName := filepath.Base(t.source)
+
+		switch engine {
+		default:
+			templar = &TextTemplar{
+				source:     source,
+				name:       templateName,
+				delimLeft:  delimLeft,
+				delimRight: delimRight,
+			}
+		}
+
+		render, err := templar.generateTemplate()
+		if err != nil {
+			return err
+		}
+
+		if err = writeFile(t.destination, render); err != nil {
+			return err
+		}
+
 	}
 	return nil
 }
@@ -105,8 +168,8 @@ func main() {
 		log.Print("Generating templates")
 	}
 
-	if err := generateTemplates(tmpls, debugTemplates, delimLeft, delimRight); err != nil {
-		log.Fatal(err)
+	if err := generateTemplates(tmpls, debugTemplates, delimLeft, delimRight, "default"); err != nil {
+		panic(err)
 	}
 
 	if doExec {
