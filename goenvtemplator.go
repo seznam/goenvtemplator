@@ -4,51 +4,55 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	log "github.com/golang/glog"
+	"github.com/joho/godotenv"
+
+	"github.com/seznam/goenvtemplator/engine"
 )
 
-type Templar interface {
-	generateTemplate() (string, error)
-}
+var (
+	buildVersion string = "Build version was not specified."
+)
 
-type templatePaths struct {
+type templatesPaths []templatePath
+
+// to parse slice of strings from flags we need to use custom type
+type envFiles []string
+
+type templatePath struct {
 	source      string
 	destination string
 }
 
-func (t templatePaths) String() string {
+func (t templatePath) String() string {
 	return fmt.Sprintf("{source: '%s', destination: '%s'}",
 		t.source, t.destination)
 }
 
-type templatesPaths []templatePaths
-
 func (ts *templatesPaths) Set(value string) error {
-	var t templatePaths
-	parts := strings.Split(value, ":")
-	if len(parts) == 2 {
-		t.source = strings.TrimSpace(parts[0])
-		t.destination = strings.TrimSpace(parts[1])
-	} else {
+	parts := strings.SplitN(value, ":", 2)
+	if len(parts) < 2 {
 		return errors.New("Option has invalid format!")
 	}
-	*ts = append(*ts, t)
+
+	*ts = append(*ts, templatePath{
+		source:      strings.TrimSpace(parts[0]),
+		destination: strings.TrimSpace(parts[1]),
+	})
+
 	return nil
 }
 
 func (ts *templatesPaths) String() string {
 	return fmt.Sprintf("%v", *ts)
 }
-
-// to parse slice of strings from flags we need to use custom type
-type envFiles []string
 
 func (ef *envFiles) Set(value string) error {
 	*ef = append(*ef, value)
@@ -61,8 +65,7 @@ func (ef *envFiles) String() string {
 
 func writeFile(destinationPath string, data string) error {
 	if !filepath.IsAbs(destinationPath) {
-		log.Fatalf("Destination path '%s' is not absolute!", destinationPath)
-		return errors.New("absolute path error")
+		return fmt.Errorf("absolute path error: %s", destinationPath)
 	}
 
 	if err := ioutil.WriteFile(destinationPath, []byte(data), 0664); err != nil {
@@ -72,10 +75,9 @@ func writeFile(destinationPath string, data string) error {
 	return nil
 }
 
-func readSource(templatePath string) (string, error) {
+func readFile(templatePath string) (string, error) {
 	if !filepath.IsAbs(templatePath) {
-		log.Fatalf("Template path '%s' is not absolute!", templatePath)
-		return "", errors.New("absolute path error")
+		return "", fmt.Errorf("absolute path error: %s", templatePath)
 	}
 
 	var slice []byte
@@ -88,35 +90,44 @@ func readSource(templatePath string) (string, error) {
 
 }
 
-func generateTemplates(
-	ts templatesPaths, debug bool, delimLeft string, delimRight string, engine string) error {
+func generateTemplates(ts templatesPaths, engineName string) error {
 	for _, t := range ts {
-		if v > 0 {
-			log.Printf("generating %s -> %s", t.source, t.destination)
+		if log.V(1) {
+			log.Info("generating %s -> %s", t.source, t.destination)
 		}
 
-		var templar Templar
+		var templar engine.Templar
 
-		source, err := readSource(t.source)
+		source, err := readFile(t.source)
 		if err != nil {
 			return err
 		}
 
 		templateName := filepath.Base(t.source)
 
-		switch engine {
-		default:
-			templar = &TextTemplar{
-				source:     source,
-				name:       templateName,
-				delimLeft:  delimLeft,
-				delimRight: delimRight,
+		switch engineName {
+		case "pongo":
+			templar = &engine.PongoTemplar{
+				Source: source,
+			}
+		case "text/template":
+			templar = &engine.TextTemplar{
+				Source: source,
+				Name:   templateName,
 			}
 		}
 
-		render, err := templar.generateTemplate()
+		if log.V(3) {
+			log.Info("Templating %s", templateName)
+		}
+
+		render, err := templar.GenerateTemplate()
 		if err != nil {
 			return err
+		}
+
+		if log.V(3) {
+			log.Info("Generated template %s", render)
 		}
 
 		if err = writeFile(t.destination, render); err != nil {
@@ -127,49 +138,41 @@ func generateTemplates(
 	return nil
 }
 
-var (
-	v            int
-	buildVersion string = "Build version was not specified."
-)
-
 func main() {
 	var tmpls templatesPaths
-	flag.Var(&tmpls, "template", "Template (/template:/dest). Can be passed multiple times.")
-	var debugTemplates bool
-	flag.BoolVar(&debugTemplates, "debug-templates", false, "Print processed templates to stdout.")
 	var doExec bool
-	flag.BoolVar(&doExec, "exec", false, "Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.")
 	var printVersion bool
-	flag.BoolVar(&printVersion, "version", false, "Prints version.")
 	var envFileList envFiles
+	var engine string
+
+	flag.Var(&tmpls, "template", "Template (/template:/dest). Can be passed multiple times.")
+	flag.BoolVar(&doExec, "exec", false, "Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.")
+	flag.BoolVar(&printVersion, "version", false, "Prints version.")
 	flag.Var(&envFileList, "env-file", "Additional file with environment variables. Can be passed multiple times.")
-	var delimLeft string
-	flag.StringVar(&delimLeft, "delim-left", "", "Override default left delimiter {{.")
-	var delimRight string
-	flag.StringVar(&delimRight, "delim-right", "", "Override default right delimiter }}.")
-	flag.IntVar(&v, "v", 0, "Verbosity level.")
+	flag.StringVar(
+		&engine, "engine", "text/template",
+		"Override default text/template [supports: text/template, pongo]",
+	)
 
 	flag.Parse()
-
 	// if no env-file was passed, godotenv.Load loads .env file by default, we want to disable this
 	if len(envFileList) > 0 {
-		err := godotenv.Load(envFileList...)
-		if err != nil {
+		if err := godotenv.Load(envFileList...); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	if printVersion {
-		log.Printf("Version: %s", buildVersion)
+		log.Info("Version: %s", buildVersion)
 		os.Exit(0)
 	}
 
-	if v > 0 {
-		log.Print("Generating templates")
+	if log.V(1) {
+		log.Info("Generating templates")
 	}
 
-	if err := generateTemplates(tmpls, debugTemplates, delimLeft, delimRight, "default"); err != nil {
-		panic(err)
+	if err := generateTemplates(tmpls, engine); err != nil {
+		log.Fatal(err)
 	}
 
 	if doExec {

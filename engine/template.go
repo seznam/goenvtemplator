@@ -1,24 +1,44 @@
-package main
+package engine
 
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
-	"github.com/Masterminds/sprig"
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/Masterminds/sprig"
 )
 
 type TextTemplar struct {
-	source     string
-	name       string
-	delimLeft  string
-	delimRight string
+	Source string
+	Name   string
 }
 
 type OptionalString struct {
 	ptr *string
+}
+
+var (
+	delimLeft  string
+	delimRight string
+)
+
+func init() {
+	flag.StringVar(
+		&delimLeft,
+		"delim-left",
+		"",
+		"(text/template only) Override default left delimiter {{.",
+	)
+	flag.StringVar(
+		&delimRight,
+		"delim-right",
+		"",
+		"(text/template only) Override default right delimiter }}.",
+	)
 }
 
 func (s OptionalString) String() string {
@@ -46,7 +66,7 @@ func Require(arg interface{}) (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("Requires: unsupported type '%T'!", v)
+	return "", fmt.Errorf("Requires: unsupported type '%T'!", arg)
 }
 
 func EnvAll() (map[string]string, error) {
@@ -65,16 +85,13 @@ var funcMap = template.FuncMap{
 	"envall":  EnvAll,
 }
 
-func (templar *TextTemplar) generateTemplate() (string, error) {
-	var t *template.Template
-	var err error
-
-	t, err = template.New(templar.name).
-		Delims(templar.delimLeft, templar.delimRight).
+func (templar *TextTemplar) GenerateTemplate() (string, error) {
+	t, err := template.New(templar.Name).
+		Delims(delimLeft, delimRight).
 		Option("missingkey=error").
 		Funcs(funcMap).
 		Funcs(sprig.TxtFuncMap()).
-		Parse(templar.source)
+		Parse(templar.Source)
 
 	if err != nil {
 		return "", err
