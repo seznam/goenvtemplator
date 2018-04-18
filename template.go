@@ -66,10 +66,7 @@ var funcMap = template.FuncMap{
 }
 
 func (templar *TextTemplar) generateTemplate() (string, error) {
-	var t *template.Template
-	var err error
-
-	t, err = template.New(templar.name).
+	t, err := template.New(templar.name).
 		Delims(templar.delimLeft, templar.delimRight).
 		Option("missingkey=error").
 		Funcs(funcMap).

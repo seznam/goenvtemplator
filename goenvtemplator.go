@@ -105,6 +105,10 @@ func generateTemplates(
 		templateName := filepath.Base(t.source)
 
 		switch engine {
+		case "pongo":
+			templar = &PongoTemplar{
+				source: source,
+			}
 		default:
 			templar = &TextTemplar{
 				source:     source,
@@ -148,13 +152,14 @@ func main() {
 	var delimRight string
 	flag.StringVar(&delimRight, "delim-right", "", "Override default right delimiter }}.")
 	flag.IntVar(&v, "v", 0, "Verbosity level.")
+	var engine string
+	flag.StringVar(&engine, "engine", "", "Override default text/template")
 
 	flag.Parse()
 
 	// if no env-file was passed, godotenv.Load loads .env file by default, we want to disable this
 	if len(envFileList) > 0 {
-		err := godotenv.Load(envFileList...)
-		if err != nil {
+		if err := godotenv.Load(envFileList...); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -168,7 +173,7 @@ func main() {
 		log.Print("Generating templates")
 	}
 
-	if err := generateTemplates(tmpls, debugTemplates, delimLeft, delimRight, "default"); err != nil {
+	if err := generateTemplates(tmpls, debugTemplates, delimLeft, delimRight, engine); err != nil {
 		panic(err)
 	}
 
