@@ -1,19 +1,20 @@
 package main
 
 import (
-	"github.com/flosch/pongo2"
 	"os"
 	"strings"
+
+	"github.com/flosch/pongo2"
 )
 
 type PongoTemplar struct {
-	source string
+	Source string
 }
 
 func (templar *PongoTemplar) generateTemplate() (string, error) {
 	context := pongo2.Context{}
 
-	tmpl, err := pongo2.FromString(templar.source)
+	tmpl, err := pongo2.FromString(templar.Source)
 	if err != nil {
 		return "", err
 	}
@@ -24,6 +25,8 @@ func (templar *PongoTemplar) generateTemplate() (string, error) {
 
 		context[key] = value
 	}
+
+	Debug("Using context %v", context)
 
 	out, err := tmpl.Execute(context)
 	if err != nil {

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,43 +11,52 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"github.com/joho/godotenv"
 )
+
+var (
+	v            int
+	buildVersion string = "Build version was not specified."
+	DEBUG        bool
+)
+
+type templatesPaths []templatePath
+
+// to parse slice of strings from flags we need to use custom type
+type envFiles []string
 
 type Templar interface {
 	generateTemplate() (string, error)
 }
 
-type templatePaths struct {
+type templatePath struct {
 	source      string
 	destination string
 }
 
-func (t templatePaths) String() string {
+func (t templatePath) String() string {
 	return fmt.Sprintf("{source: '%s', destination: '%s'}",
 		t.source, t.destination)
 }
 
-type templatesPaths []templatePaths
-
 func (ts *templatesPaths) Set(value string) error {
-	var t templatePaths
-	parts := strings.Split(value, ":")
-	if len(parts) == 2 {
-		t.source = strings.TrimSpace(parts[0])
-		t.destination = strings.TrimSpace(parts[1])
-	} else {
+	parts := strings.SplitN(value, ":", 2)
+	if len(parts) < 2 {
 		return errors.New("Option has invalid format!")
 	}
-	*ts = append(*ts, t)
+
+	*ts = append(*ts, templatePath{
+		source:      strings.TrimSpace(parts[0]),
+		destination: strings.TrimSpace(parts[1]),
+	})
+
 	return nil
 }
 
 func (ts *templatesPaths) String() string {
 	return fmt.Sprintf("%v", *ts)
 }
-
-// to parse slice of strings from flags we need to use custom type
-type envFiles []string
 
 func (ef *envFiles) Set(value string) error {
 	*ef = append(*ef, value)
@@ -88,8 +96,18 @@ func readSource(templatePath string) (string, error) {
 
 }
 
+func Debug(message string, args ...interface{}) {
+	if DEBUG {
+		log.Printf(message, args...)
+	}
+}
+
 func generateTemplates(
-	ts templatesPaths, debug bool, delimLeft string, delimRight string, engine string) error {
+	ts templatesPaths,
+	delimLeft string,
+	delimRight string,
+	engine string) error {
+
 	for _, t := range ts {
 		if v > 0 {
 			log.Printf("generating %s -> %s", t.source, t.destination)
@@ -107,21 +125,25 @@ func generateTemplates(
 		switch engine {
 		case "pongo":
 			templar = &PongoTemplar{
-				source: source,
+				Source: source,
 			}
 		default:
 			templar = &TextTemplar{
-				source:     source,
-				name:       templateName,
-				delimLeft:  delimLeft,
-				delimRight: delimRight,
+				Source:     source,
+				Name:       templateName,
+				DelimLeft:  delimLeft,
+				DelimRight: delimRight,
 			}
 		}
+
+		Debug("Templating %s", templateName)
 
 		render, err := templar.generateTemplate()
 		if err != nil {
 			return err
 		}
+
+		Debug("Generated template %s", render)
 
 		if err = writeFile(t.destination, render); err != nil {
 			return err
@@ -131,32 +153,26 @@ func generateTemplates(
 	return nil
 }
 
-var (
-	v            int
-	buildVersion string = "Build version was not specified."
-)
-
 func main() {
 	var tmpls templatesPaths
-	flag.Var(&tmpls, "template", "Template (/template:/dest). Can be passed multiple times.")
-	var debugTemplates bool
-	flag.BoolVar(&debugTemplates, "debug-templates", false, "Print processed templates to stdout.")
 	var doExec bool
-	flag.BoolVar(&doExec, "exec", false, "Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.")
 	var printVersion bool
-	flag.BoolVar(&printVersion, "version", false, "Prints version.")
 	var envFileList envFiles
-	flag.Var(&envFileList, "env-file", "Additional file with environment variables. Can be passed multiple times.")
 	var delimLeft string
-	flag.StringVar(&delimLeft, "delim-left", "", "Override default left delimiter {{.")
 	var delimRight string
+	var engine string
+
+	flag.Var(&tmpls, "template", "Template (/template:/dest). Can be passed multiple times.")
+	flag.BoolVar(&DEBUG, "debug-templates", false, "Print processed templates to stdout.")
+	flag.BoolVar(&doExec, "exec", false, "Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.")
+	flag.BoolVar(&printVersion, "version", false, "Prints version.")
+	flag.Var(&envFileList, "env-file", "Additional file with environment variables. Can be passed multiple times.")
+	flag.StringVar(&delimLeft, "delim-left", "", "Override default left delimiter {{.")
 	flag.StringVar(&delimRight, "delim-right", "", "Override default right delimiter }}.")
 	flag.IntVar(&v, "v", 0, "Verbosity level.")
-	var engine string
-	flag.StringVar(&engine, "engine", "", "Override default text/template")
+	flag.StringVar(&engine, "engine", "", "Override default text/template [support: pongo2]")
 
 	flag.Parse()
-
 	// if no env-file was passed, godotenv.Load loads .env file by default, we want to disable this
 	if len(envFileList) > 0 {
 		if err := godotenv.Load(envFileList...); err != nil {
@@ -173,7 +189,7 @@ func main() {
 		log.Print("Generating templates")
 	}
 
-	if err := generateTemplates(tmpls, debugTemplates, delimLeft, delimRight, engine); err != nil {
+	if err := generateTemplates(tmpls, delimLeft, delimRight, engine); err != nil {
 		panic(err)
 	}
 

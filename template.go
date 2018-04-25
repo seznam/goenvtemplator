@@ -4,17 +4,18 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/Masterminds/sprig"
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/Masterminds/sprig"
 )
 
 type TextTemplar struct {
-	source     string
-	name       string
-	delimLeft  string
-	delimRight string
+	Source     string
+	Name       string
+	DelimLeft  string
+	DelimRight string
 }
 
 type OptionalString struct {
@@ -66,12 +67,12 @@ var funcMap = template.FuncMap{
 }
 
 func (templar *TextTemplar) generateTemplate() (string, error) {
-	t, err := template.New(templar.name).
-		Delims(templar.delimLeft, templar.delimRight).
+	t, err := template.New(templar.Name).
+		Delims(templar.DelimLeft, templar.DelimRight).
 		Option("missingkey=error").
 		Funcs(funcMap).
 		Funcs(sprig.TxtFuncMap()).
-		Parse(templar.source)
+		Parse(templar.Source)
 
 	if err != nil {
 		return "", err
