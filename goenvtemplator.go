@@ -127,7 +127,7 @@ func generateTemplates(
 			templar = &PongoTemplar{
 				Source: source,
 			}
-		default:
+		case "text/template":
 			templar = &TextTemplar{
 				Source:     source,
 				Name:       templateName,
@@ -170,7 +170,7 @@ func main() {
 	flag.StringVar(&delimLeft, "delim-left", "", "Override default left delimiter {{.")
 	flag.StringVar(&delimRight, "delim-right", "", "Override default right delimiter }}.")
 	flag.IntVar(&v, "v", 0, "Verbosity level.")
-	flag.StringVar(&engine, "engine", "", "Override default text/template [support: pongo2]")
+	flag.StringVar(&engine, "engine", "text/template", "Override default text/template [support: pongo2]")
 
 	flag.Parse()
 	// if no env-file was passed, godotenv.Load loads .env file by default, we want to disable this
@@ -190,7 +190,7 @@ func main() {
 	}
 
 	if err := generateTemplates(tmpls, delimLeft, delimRight, engine); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	if doExec {
