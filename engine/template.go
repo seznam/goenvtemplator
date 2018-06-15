@@ -3,6 +3,7 @@ package engine
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -12,14 +13,32 @@ import (
 )
 
 type TextTemplar struct {
-	Source     string
-	Name       string
-	DelimLeft  string
-	DelimRight string
+	Source string
+	Name   string
 }
 
 type OptionalString struct {
 	ptr *string
+}
+
+var (
+	delimLeft  string
+	delimRight string
+)
+
+func init() {
+	flag.StringVar(
+		&delimLeft,
+		"delim-left",
+		"",
+		"(text/template only) Override default left delimiter {{.",
+	)
+	flag.StringVar(
+		&delimRight,
+		"delim-right",
+		"",
+		"(text/template only) Override default right delimiter }}.",
+	)
 }
 
 func (s OptionalString) String() string {
@@ -68,7 +87,7 @@ var funcMap = template.FuncMap{
 
 func (templar *TextTemplar) GenerateTemplate() (string, error) {
 	t, err := template.New(templar.Name).
-		Delims(templar.DelimLeft, templar.DelimRight).
+		Delims(delimLeft, delimRight).
 		Option("missingkey=error").
 		Funcs(funcMap).
 		Funcs(sprig.TxtFuncMap()).

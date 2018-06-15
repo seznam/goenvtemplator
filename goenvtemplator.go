@@ -90,12 +90,7 @@ func readFile(templatePath string) (string, error) {
 
 }
 
-func generateTemplates(
-	ts templatesPaths,
-	delimLeft string,
-	delimRight string,
-	engineName string) error {
-
+func generateTemplates(ts templatesPaths, engineName string) error {
 	for _, t := range ts {
 		if log.V(1) {
 			log.Info("generating %s -> %s", t.source, t.destination)
@@ -117,10 +112,8 @@ func generateTemplates(
 			}
 		case "text/template":
 			templar = &engine.TextTemplar{
-				Source:     source,
-				Name:       templateName,
-				DelimLeft:  delimLeft,
-				DelimRight: delimRight,
+				Source: source,
+				Name:   templateName,
 			}
 		}
 
@@ -150,17 +143,16 @@ func main() {
 	var doExec bool
 	var printVersion bool
 	var envFileList envFiles
-	var delimLeft string
-	var delimRight string
 	var engine string
 
 	flag.Var(&tmpls, "template", "Template (/template:/dest). Can be passed multiple times.")
 	flag.BoolVar(&doExec, "exec", false, "Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.")
 	flag.BoolVar(&printVersion, "version", false, "Prints version.")
 	flag.Var(&envFileList, "env-file", "Additional file with environment variables. Can be passed multiple times.")
-	flag.StringVar(&delimLeft, "delim-left", "", "Override default left delimiter {{.")
-	flag.StringVar(&delimRight, "delim-right", "", "Override default right delimiter }}.")
-	flag.StringVar(&engine, "engine", "text/template", "Override default text/template [support: pongo2]")
+	flag.StringVar(
+		&engine, "engine", "text/template",
+		"Override default text/template [supports: text/template, pongo]",
+	)
 
 	flag.Parse()
 	// if no env-file was passed, godotenv.Load loads .env file by default, we want to disable this
@@ -179,7 +171,7 @@ func main() {
 		log.Info("Generating templates")
 	}
 
-	if err := generateTemplates(tmpls, delimLeft, delimRight, engine); err != nil {
+	if err := generateTemplates(tmpls, engine); err != nil {
 		log.Fatal(err)
 	}
 
