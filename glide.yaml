@@ -6,3 +6,4 @@ import:
   version: 2.8.0
 - package: github.com/flosch/pongo2
   version: v3
+- package: github.com/golang/glog

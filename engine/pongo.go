@@ -1,17 +1,18 @@
-package main
+package engine
 
 import (
 	"os"
 	"strings"
 
 	"github.com/flosch/pongo2"
+	log "github.com/golang/glog"
 )
 
 type PongoTemplar struct {
 	Source string
 }
 
-func (templar *PongoTemplar) generateTemplate() (string, error) {
+func (templar *PongoTemplar) GenerateTemplate() (string, error) {
 	context := pongo2.Context{}
 
 	tmpl, err := pongo2.FromString(templar.Source)
@@ -26,7 +27,9 @@ func (templar *PongoTemplar) generateTemplate() (string, error) {
 		context[key] = value
 	}
 
-	Debug("Using context %v", context)
+	if log.V(3) {
+		log.Info("Using context %v", context)
+	}
 
 	out, err := tmpl.Execute(context)
 	if err != nil {

@@ -1,4 +1,4 @@
-package main
+package engine
 
 import (
 	"bytes"
@@ -47,7 +47,7 @@ func Require(arg interface{}) (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("Requires: unsupported type '%T'!", v)
+	return "", fmt.Errorf("Requires: unsupported type '%T'!", arg)
 }
 
 func EnvAll() (map[string]string, error) {
@@ -66,7 +66,7 @@ var funcMap = template.FuncMap{
 	"envall":  EnvAll,
 }
 
-func (templar *TextTemplar) generateTemplate() (string, error) {
+func (templar *TextTemplar) GenerateTemplate() (string, error) {
 	t, err := template.New(templar.Name).
 		Delims(templar.DelimLeft, templar.DelimRight).
 		Option("missingkey=error").

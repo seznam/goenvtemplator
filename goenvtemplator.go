@@ -5,30 +5,26 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
 
+	log "github.com/golang/glog"
 	"github.com/joho/godotenv"
+
+	"git.autisti.cz/tcpj/goenvtemplator/engine"
 )
 
 var (
-	v            int
 	buildVersion string = "Build version was not specified."
-	DEBUG        bool
 )
 
 type templatesPaths []templatePath
 
 // to parse slice of strings from flags we need to use custom type
 type envFiles []string
-
-type Templar interface {
-	generateTemplate() (string, error)
-}
 
 type templatePath struct {
 	source      string
@@ -69,8 +65,7 @@ func (ef *envFiles) String() string {
 
 func writeFile(destinationPath string, data string) error {
 	if !filepath.IsAbs(destinationPath) {
-		log.Fatalf("Destination path '%s' is not absolute!", destinationPath)
-		return errors.New("absolute path error")
+		return fmt.Errorf("absolute path error: %s", destinationPath)
 	}
 
 	if err := ioutil.WriteFile(destinationPath, []byte(data), 0664); err != nil {
@@ -80,10 +75,9 @@ func writeFile(destinationPath string, data string) error {
 	return nil
 }
 
-func readSource(templatePath string) (string, error) {
+func readFile(templatePath string) (string, error) {
 	if !filepath.IsAbs(templatePath) {
-		log.Fatalf("Template path '%s' is not absolute!", templatePath)
-		return "", errors.New("absolute path error")
+		return "", fmt.Errorf("absolute path error: %s", templatePath)
 	}
 
 	var slice []byte
@@ -96,39 +90,33 @@ func readSource(templatePath string) (string, error) {
 
 }
 
-func Debug(message string, args ...interface{}) {
-	if DEBUG {
-		log.Printf(message, args...)
-	}
-}
-
 func generateTemplates(
 	ts templatesPaths,
 	delimLeft string,
 	delimRight string,
-	engine string) error {
+	engineName string) error {
 
 	for _, t := range ts {
-		if v > 0 {
-			log.Printf("generating %s -> %s", t.source, t.destination)
+		if log.V(1) {
+			log.Info("generating %s -> %s", t.source, t.destination)
 		}
 
-		var templar Templar
+		var templar engine.Templar
 
-		source, err := readSource(t.source)
+		source, err := readFile(t.source)
 		if err != nil {
 			return err
 		}
 
 		templateName := filepath.Base(t.source)
 
-		switch engine {
+		switch engineName {
 		case "pongo":
-			templar = &PongoTemplar{
+			templar = &engine.PongoTemplar{
 				Source: source,
 			}
 		case "text/template":
-			templar = &TextTemplar{
+			templar = &engine.TextTemplar{
 				Source:     source,
 				Name:       templateName,
 				DelimLeft:  delimLeft,
@@ -136,14 +124,18 @@ func generateTemplates(
 			}
 		}
 
-		Debug("Templating %s", templateName)
+		if log.V(3) {
+			log.Info("Templating %s", templateName)
+		}
 
-		render, err := templar.generateTemplate()
+		render, err := templar.GenerateTemplate()
 		if err != nil {
 			return err
 		}
 
-		Debug("Generated template %s", render)
+		if log.V(3) {
+			log.Info("Generated template %s", render)
+		}
 
 		if err = writeFile(t.destination, render); err != nil {
 			return err
@@ -163,13 +155,11 @@ func main() {
 	var engine string
 
 	flag.Var(&tmpls, "template", "Template (/template:/dest). Can be passed multiple times.")
-	flag.BoolVar(&DEBUG, "debug-templates", false, "Print processed templates to stdout.")
 	flag.BoolVar(&doExec, "exec", false, "Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.")
 	flag.BoolVar(&printVersion, "version", false, "Prints version.")
 	flag.Var(&envFileList, "env-file", "Additional file with environment variables. Can be passed multiple times.")
 	flag.StringVar(&delimLeft, "delim-left", "", "Override default left delimiter {{.")
 	flag.StringVar(&delimRight, "delim-right", "", "Override default right delimiter }}.")
-	flag.IntVar(&v, "v", 0, "Verbosity level.")
 	flag.StringVar(&engine, "engine", "text/template", "Override default text/template [support: pongo2]")
 
 	flag.Parse()
@@ -181,12 +171,12 @@ func main() {
 	}
 
 	if printVersion {
-		log.Printf("Version: %s", buildVersion)
+		log.Info("Version: %s", buildVersion)
 		os.Exit(0)
 	}
 
-	if v > 0 {
-		log.Print("Generating templates")
+	if log.V(1) {
+		log.Info("Generating templates")
 	}
 
 	if err := generateTemplates(tmpls, delimLeft, delimRight, engine); err != nil {
