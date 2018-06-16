@@ -14,7 +14,7 @@ import (
 	log "github.com/golang/glog"
 	"github.com/joho/godotenv"
 
-	"git.autisti.cz/tcpj/goenvtemplator/engine"
+	"github.com/seznam/goenvtemplator/engine"
 )
 
 var (
