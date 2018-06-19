@@ -18,6 +18,7 @@ func TestGenerateTemplate(t *testing.T) {
 		err        error
 		leftDelim  string
 		rightDelim string
+		engine     string
 	}{
 		{in: `K={{ env "GOENVTEMPLATOR_DEFINED_VAR" }}`, want: `K=foo`},
 		{in: `K={{ env "GOENVTEMPLATOR_DEFINED_FILE_VAR" }}`, want: `K=bar`},
@@ -33,6 +34,8 @@ func TestGenerateTemplate(t *testing.T) {
 		{in: `<?xml version="1.0"?>`, want: `<?xml version="1.0"?>`},
 		{in: `K={{env "GOENVTEMPLATOR_DEFINED_VAR"}}`, want: `K={{env "GOENVTEMPLATOR_DEFINED_VAR"}}`, err: nil, leftDelim: "[[", rightDelim: "]]"},
 		{in: `K=[[env "GOENVTEMPLATOR_DEFINED_VAR"]]`, want: `K=foo`, err: nil, leftDelim: "[[", rightDelim: "]]"},
+		{in: `K={{ GOENVTEMPLATOR_DEFINED_VAR }}`, want: `K=foo`, engine: `pongo`},
+		{in: `K={{ FOO|default:"bar" }}`, want: `K=bar`, engine: `pongo`},
 	}
 
 	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR", "foo")
@@ -43,7 +46,23 @@ func TestGenerateTemplate(t *testing.T) {
 	}
 
 	for _, testcase := range tests {
-		got, gotErr := generateTemplate(testcase.in, templateName, testcase.leftDelim, testcase.rightDelim)
+		var templar Templar
+
+		switch testcase.engine {
+		case "pongo":
+			templar = &PongoTemplar{
+				Source: testcase.in,
+			}
+		default:
+			templar = &TextTemplar{
+				Source:     testcase.in,
+				Name:       templateName,
+				DelimLeft:  testcase.leftDelim,
+				DelimRight: testcase.rightDelim,
+			}
+		}
+
+		got, gotErr := templar.generateTemplate()
 
 		if testcase.contains != "" {
 			if !strings.Contains(got, testcase.contains) {
