@@ -1,3 +1,10 @@
+goenvtemplator (2.1.0) UNRELEASED; urgency=medium
+
+  * Support for pongo2 template language
+  * Simple API for fast template language implementation
+
+ -- Jakub Dusek <jakub.dusek@firma.seznam.cz>  Fri, 20 Jul 2017 17:42:19 +0200
+
 goenvtemplator (2.0.0~rc3) Seznam; urgency=medium
 
   * Binary name changed to goenvtemplator2 to support dual installation of both major versions.
