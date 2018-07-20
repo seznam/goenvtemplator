@@ -10,16 +10,49 @@ goenvtemplator2 [OPTIONS]
 goenvtemplator2 is a simple app, that can template your config files by environment variables and optionally replace itself (by exec syscall) with the application binary. So at the end your application runs directly under the process that run this tool like docker as if it was originally the entrypoint itself.
 
 .SH OPTIONS
-Possible OPTIONS are:
-  -debug-templates    Print processed templates to stdout.
-  -env-file FILE      Additional file with environment variables. Can be
-                      passed multiple times. (default [])
-  -exec COMMAND ARGS  Activates exec by command. First non-flag arguments is
-                      the command, the rest are it's arguments.
-  -template VALUE     Template (/template:/dest). Can be passed multiple
-                      times. (default [])
-  -v INT              Verbosity level.
-  -version            Prints version.
+.TP
+.BI "\-alsologtostderr"\fR
+log to standard error as well as files
+.TP
+.BI "\-delim-left \fIstring"\fR
+(text/template only) Override default left delimiter {{.
+.TP
+.BI "\-delim-right \fIstring"
+(text/template only) Override default right delimiter }}.
+.TP
+.BI "\-engine \fIstring"
+Override default text/template [supports: text/template, pongo] (default "text/template")
+.TP
+.BI "\-env-file \fIvalue"
+Additional file with environment variables. Can be passed multiple times.
+.TP
+.BI "\-exec"\fR
+Activates exec by command. First non-flag arguments is the command, the rest are it's arguments.
+.TP
+.BI "\-log_backtrace_at \fIvalue"
+when logging hits line file:N, emit a stack trace
+.TP
+.BI "\-log_dir \fIstring"
+If non-empty, write log files in this directory
+.TP
+.BI "\-logtostderr"
+log to standard error instead of files
+.TP
+.BI "\-stderrthreshold \fIvalue"
+logs at or above this threshold go to stderr
+.TP
+.BI "\-template \fIvalue"
+Template (/template:/dest). Can be passed multiple times.
+.TP
+.BI "\-v \fIvalue"
+log level for V logs
+.TP
+.BI "\-version"
+Prints version.
+.TP
+.BI "\-vmodule \fIvalue"
+comma-separated list of pattern=N settings for file-filtered logging
+
 .SH SEE ALSO
 envsubst(1), env(1)
 .SH BUGS
