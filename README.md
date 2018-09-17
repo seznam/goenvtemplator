@@ -20,10 +20,7 @@ RUN chmod +x /usr/local/bin/goenvtemplator2
 
 ## Building from source
 ```bash
-# if you have glide already get the binary
-go get github.com/Masterminds/glide
-# install dependencies
-$GOPATH/bin/glide i
+# be sure to you golang >= 1.11 or use vgo
 make
 ```
 
