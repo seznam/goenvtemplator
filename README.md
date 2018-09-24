@@ -75,6 +75,7 @@ B=bb
 export C=c
 # yaml syntax
 D: d
+E=$A
 ```
 
 The behaviour of env-file argument and env variables evaluation is as follows:
@@ -90,7 +91,11 @@ goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $C'
 > c
 goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $D'
 > d
+goenvtemplator2 -env-file myenvfile -exec sh -c 'echo $E'
+> a
 ```
+
+For more information about env-files features see [github.com/joho/godotenv](https://github.com/joho/godotenv) documentation, which goenvtemplator internally uses as a library.
 
 ## Using Templates
 Templates use Golang [text/template](http://golang.org/pkg/text/template/)
