@@ -1,3 +1,13 @@
+goenvtemplator (2.0.0~rc4) Seznam; urgency=medium
+
+  * DEPRECATION: require built-in function is now deprecated; use required built-in instead.
+  * Added required built-in function (same as helm).
+  * Added envall built-in function.
+  * Added -delim-left and -delim-right options.
+  * Updated godotenv version.
+
+ -- Tomas Dohnalek <tomas.dohnalek@firma.seznam.cz>  Wed, 17 Oct 2018 08:54:20 +0200
+
 goenvtemplator (2.0.0~rc3) Seznam; urgency=medium
 
   * Binary name changed to goenvtemplator2 to support dual installation of both major versions.

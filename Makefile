@@ -21,7 +21,7 @@ test:
 	go test
 
 release:
-	GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o goenvtemplator-amd64 
+	GOOS=linux GOARCH=amd64 go build -ldflags "$(LDFLAGS)" -o goenvtemplator-amd64
 	tar -cJf goenvtemplator.tar.xz goenvtemplator-amd64
 	tar -tvf goenvtemplator.tar.xz
 
