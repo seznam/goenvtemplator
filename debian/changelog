@@ -1,3 +1,9 @@
+goenvtemplator (2.0.0) Seznam; urgency=medium
+
+  * Release bump; see all rc changelogs to see changes since v1.
+
+ -- Tomas Dohnalek <tomas.dohnalek@firma.seznam.cz>  Wed, 31 Oct 2018 10:57:01 +0100
+
 goenvtemplator (2.0.0~rc4) Seznam; urgency=medium
 
   * DEPRECATION: require built-in function is now deprecated; use required built-in instead.
