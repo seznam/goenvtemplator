@@ -2,12 +2,56 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/stretchr/testify/assert"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 	"text/template"
 )
+
+func absRelPath(t *testing.T, relPath string) (string, string) {
+	absPath, err := filepath.Abs(relPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return absPath, relPath
+}
+
+func TestGenerateFile(t *testing.T) {
+	templatePathRel, templatePathAbs := absRelPath(t, "./tests/test.tmpl")
+	outputPathRel, outputPathAbs := absRelPath(t, "./tests/test.out")
+
+	testCases := []struct {
+		name          string
+		templatePath  string
+		outputPath    string
+		expectedError bool
+	}{
+		{name: "template absolute path, output absolute path", templatePath: templatePathAbs, outputPath: outputPathAbs, expectedError: false},
+		{name: "template absolute path, output relative path", templatePath: templatePathAbs, outputPath: outputPathRel, expectedError: false},
+		{name: "template relative path, output absolute path", templatePath: templatePathRel, outputPath: outputPathAbs, expectedError: false},
+		{name: "template relative path, output relative path", templatePath: templatePathRel, outputPath: outputPathRel, expectedError: false},
+		{name: "non existing template relative path", templatePath: "./fooo", outputPath: outputPathRel, expectedError: true},
+		{name: "non existing template absolute path", templatePath: "/xxx/yyy/foo/bar", outputPath: outputPathRel, expectedError: true},
+		{name: "creepy relative template path", templatePath: "./tests/../tests/test.tmpl", outputPath: outputPathRel, expectedError: false},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := generateFile(tc.templatePath, tc.outputPath, false, "{{", "}}")
+			if tc.expectedError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+
+	// Cleanup the output test file
+	_ = os.Remove(outputPathRel)
+}
 
 func TestGenerateTemplate(t *testing.T) {
 	templateName := "test"
