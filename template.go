@@ -14,7 +14,7 @@ import (
 )
 
 func Require(arg string) (string, error) {
-	fmt.Fprintf(os.Stderr, "WARNING: require built-in function is deprecated. Use required instead.\n")
+	_, _ = fmt.Fprintf(os.Stderr, "WARNING: require built-in function is deprecated. Use required instead.\n")
 	if len(arg) == 0 {
 		return "", errors.New("Required argument is missing or empty!")
 	}
@@ -46,8 +46,8 @@ func EnvAll() (map[string]string, error) {
 }
 
 var funcMap = template.FuncMap{
-	"require": Require,
-	"envall":  EnvAll,
+	"require":  Require,
+	"envall":   EnvAll,
 	"required": Required,
 }
 
