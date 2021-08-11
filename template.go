@@ -68,14 +68,6 @@ func generateTemplate(source, name string, delimLeft string, delimRight string) 
 }
 
 func generateFile(templatePath, destinationPath string, debugTemplates bool, delimLeft string, delimRight string) error {
-	if !filepath.IsAbs(templatePath) {
-		return fmt.Errorf("Template path '%s' is not absolute!", templatePath)
-	}
-
-	if !filepath.IsAbs(destinationPath) {
-		return fmt.Errorf("Destination path '%s' is not absolute!", destinationPath)
-	}
-
 	var slice []byte
 	var err error
 	if slice, err = ioutil.ReadFile(templatePath); err != nil {
