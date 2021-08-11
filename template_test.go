@@ -42,8 +42,8 @@ func TestGenerateTemplate(t *testing.T) {
 		{in: `K={{ required "message" "" }}`, err: template.ExecError{}},
 	}
 
-	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR", "foo")
-	os.Setenv("GOENVTEMPLATOR_DEFINED_VAR_EMPTY", "")
+	_ = os.Setenv("GOENVTEMPLATOR_DEFINED_VAR", "foo")
+	_ = os.Setenv("GOENVTEMPLATOR_DEFINED_VAR_EMPTY", "")
 
 	err := godotenv.Load("./tests/fixtures.env")
 	if err != nil {
