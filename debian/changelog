@@ -2,6 +2,7 @@ goenvtemplator (2.1.0) UNRELEASED; urgency=medium
 
   * Upgrade to go 1.16
   * Migrated from `glide` to `go mod`
+  * Upgrade sprig library to 2.22.0 
 
  -- Martin Chodur <martin.chodur@firma.seznam.cz>  Wed, 11 Aug 2021 13:56:32 +0200
 
