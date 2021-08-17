@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -11,17 +12,40 @@ import (
 	"text/template"
 )
 
-func absRelPath(t *testing.T, relPath string) (string, string) {
-	absPath, err := filepath.Abs(relPath)
+// getTmpFile creates tmp file with a given content and returns its absolute path, relative path and function to remove the file
+func getTmpFile(t *testing.T, content string) (string, string, func()) {
+	tmpFile, err := ioutil.TempFile("", "test-file")
 	if err != nil {
 		t.Fatal(err)
 	}
-	return absPath, relPath
+	abs, err := filepath.Abs(tmpFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel, err := filepath.Rel(wd, abs)
+	_, err = tmpFile.WriteString(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return rel, abs, func() {
+		path := abs
+		err := os.Remove(path)
+		if err != nil {
+			return
+		}
+	}
 }
 
 func TestGenerateFile(t *testing.T) {
-	templatePathRel, templatePathAbs := absRelPath(t, "./tests/test.tmpl")
-	outputPathRel, outputPathAbs := absRelPath(t, "./tests/test.out")
+	templatePathRel, templatePathAbs, removeTemplate := getTmpFile(t, "")
+	defer removeTemplate()
+	outputPathRel, outputPathAbs, removeOutput := getTmpFile(t, "")
+	defer removeOutput()
+
 
 	testCases := []struct {
 		name          string
@@ -35,7 +59,6 @@ func TestGenerateFile(t *testing.T) {
 		{name: "template relative path, output relative path", templatePath: templatePathRel, outputPath: outputPathRel, expectedError: false},
 		{name: "non existing template relative path", templatePath: "./fooo", outputPath: outputPathRel, expectedError: true},
 		{name: "non existing template absolute path", templatePath: "/xxx/yyy/foo/bar", outputPath: outputPathRel, expectedError: true},
-		{name: "creepy relative template path", templatePath: "./tests/../tests/test.tmpl", outputPath: outputPathRel, expectedError: false},
 	}
 
 	for _, tc := range testCases {
@@ -48,9 +71,6 @@ func TestGenerateFile(t *testing.T) {
 			}
 		})
 	}
-
-	// Cleanup the output test file
-	_ = os.Remove(outputPathRel)
 }
 
 func TestGenerateTemplate(t *testing.T) {
