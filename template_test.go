@@ -32,7 +32,7 @@ func getTmpFile(t *testing.T, content string) (string, string, func()) {
 		t.Fatal(err)
 	}
 	return rel, abs, func() {
-		_ := os.Remove(abs)
+		_ = os.Remove(abs)
 	}
 }
 
