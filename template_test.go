@@ -2,12 +2,72 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 	"text/template"
 )
+
+// getTmpFile creates tmp file with a given content and returns its absolute path, relative path and function to remove the file
+func getTmpFile(t *testing.T, content string) (string, string, func()) {
+	tmpFile, err := ioutil.TempFile("", "test-file")
+	if err != nil {
+		t.Fatal(err)
+	}
+	abs, err := filepath.Abs(tmpFile.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel, err := filepath.Rel(wd, abs)
+	_, err = tmpFile.WriteString(content)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return rel, abs, func() {
+		_ := os.Remove(abs)
+	}
+}
+
+func TestGenerateFile(t *testing.T) {
+	templatePathRel, templatePathAbs, removeTemplate := getTmpFile(t, "")
+	defer removeTemplate()
+	outputPathRel, outputPathAbs, removeOutput := getTmpFile(t, "")
+	defer removeOutput()
+
+
+	testCases := []struct {
+		name          string
+		templatePath  string
+		outputPath    string
+		expectedError bool
+	}{
+		{name: "template absolute path, output absolute path", templatePath: templatePathAbs, outputPath: outputPathAbs, expectedError: false},
+		{name: "template absolute path, output relative path", templatePath: templatePathAbs, outputPath: outputPathRel, expectedError: false},
+		{name: "template relative path, output absolute path", templatePath: templatePathRel, outputPath: outputPathAbs, expectedError: false},
+		{name: "template relative path, output relative path", templatePath: templatePathRel, outputPath: outputPathRel, expectedError: false},
+		{name: "non existing template relative path", templatePath: "./fooo", outputPath: outputPathRel, expectedError: true},
+		{name: "non existing template absolute path", templatePath: "/xxx/yyy/foo/bar", outputPath: outputPathRel, expectedError: true},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := generateFile(tc.templatePath, tc.outputPath, false, "{{", "}}")
+			if tc.expectedError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
 
 func TestGenerateTemplate(t *testing.T) {
 	templateName := "test"
