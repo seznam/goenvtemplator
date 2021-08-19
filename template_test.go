@@ -27,6 +27,9 @@ func getTmpFile(t *testing.T, content string) (string, string, func()) {
 		t.Fatal(err)
 	}
 	rel, err := filepath.Rel(wd, abs)
+	if err != nil {
+		t.Fatal(err)
+	}
 	_, err = tmpFile.WriteString(content)
 	if err != nil {
 		t.Fatal(err)
