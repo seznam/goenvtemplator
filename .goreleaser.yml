@@ -1,0 +1,20 @@
+release:
+  github:
+    owner: seznam
+    name: goenvtemplator
+  prerelease: auto
+  draft: true
+  name_template: "v{{.Version}}"
+
+changelog:
+  filters:
+    exclude:
+      - '^docs:'
+      - '^chore:'
+
+builds:
+  - main: .
+    id: "goenvtemplator"
+    binary: goenvtemplator2
+    goos:
+      - linux
