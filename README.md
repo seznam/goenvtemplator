@@ -114,3 +114,7 @@ Example of templating with `[[ ]]` instead of `{{ }}` delimiters
 ```bash
 goenvtemplator2 -template /foo/bar.tmpl:/bar/foo.conf -delim-left [[ -delim-right ]]
 ```
+
+## Development
+Make sure you pass the CI. If the output of the GitHub actions is not descriptive enough,
+or you can check it before submitting the code, use the `make test` and `make lint`.
