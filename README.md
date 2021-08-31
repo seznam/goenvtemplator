@@ -1,4 +1,7 @@
 # goenvtemplator
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/seznam/goenvtemplator) ![GitHub all releases](https://img.shields.io/github/downloads/seznam/goenvtemplator/total)
+
+
 Tool to template configuration files by environment variables and optionally replace itself with the target binary.
 
 goenvtemplator is a simple app, that can template your config files by environment variables and optionally replace itself (by exec syscall) with the application binary. So at the end your application runs directly under the process that run this tool like docker as if it was originally the entrypoint itself.
