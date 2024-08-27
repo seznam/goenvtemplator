@@ -23,11 +23,9 @@ RUN chmod +x /usr/local/bin/goenvtemplator2
 
 ## Building from source
 ```bash
-# if you have glide already get the binary
-go get github.com/Masterminds/glide
-# install dependencies
-$GOPATH/bin/glide i
 make
+chmod +x goenvtemplator2
+cp goenvtemplator2 /usr/local/bin
 ```
 
 ## Usage
