@@ -11,13 +11,13 @@ This tool is ideal for use without polluting you environment with dependencies. 
 ## Installation
 wget
 ```bash
-wget https://github.com/seznam/goenvtemplator/releases/download/v2.1.0/goenvtemplator2-amd64 -O /usr/local/bin/goenvtemplator2
+wget https://github.com/seznam/goenvtemplator/releases/download/v2.0.0/goenvtemplator2-amd64 -O /usr/local/bin/goenvtemplator2
 chmod +x /usr/local/bin/goenvtemplator2
 ```
 
 Dockerfile
 ```Dockerfile
-ADD https://github.com/seznam/goenvtemplator/releases/download/v2.1.0/goenvtemplator2-amd64 /usr/local/bin/goenvtemplator2
+ADD https://github.com/seznam/goenvtemplator/releases/download/v2.0.0/goenvtemplator2-amd64 /usr/local/bin/goenvtemplator2
 RUN chmod +x /usr/local/bin/goenvtemplator2
 ```
 
